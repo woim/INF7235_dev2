@@ -1,12 +1,12 @@
 # Makefiel pour projet resampling
-COMPILER=/usr/bin/g++
-OPTIONS= -std=c++11 -Wall -Wfatal-errors -Dcimg_display=0
+COMPILER=/usr/bin/gcc
+OPTIONS= -I stb/ -lm -Wno-pointer-to-int-cast -Wno-int-to-pointer-cast
 
 default: resampling_seq
 	./resampling_sequential parrot.ppm
 
-resampling_seq: resampling_sequential.cpp
-	$(COMPILER) $(OPTIONS) resampling_sequential.cpp -o resampling_sequential
+resampling_seq: resampling_sequential.c
+	$(COMPILER) $(OPTIONS) resampling_sequential.c -o resampling_sequential
 
 bm:
 
