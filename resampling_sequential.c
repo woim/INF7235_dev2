@@ -2,6 +2,8 @@
 #include "stddef.h"
 #include "resampling.h"
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -16,7 +18,7 @@ int main(int argc, char* argv[])
   }
 
   // Laod the image
-  int x, y, n;
+  int x, y, n, i,length;
   unsigned char* data_src = stbi_load(argv[1], &x, &y, &n, 0);
 
   if( data_src == NULL )
@@ -49,11 +51,16 @@ int main(int argc, char* argv[])
                                         destination.data_size*
                                         sizeof(unsigned char));
 
+  length = destination.size[1]*destination.size[0]*destination.data_size;
+  for( i = 0; i < length ; ++i )
+  {
+    destination.data[i] = source.data[i];
+  }
 
   double matrix[2][3] = { {1.0, 0.0, 0.0},
                           {0.0, 1.0, 0.0} };
 
-  resampling( matrix, &source, &destination );
+  //resampling( matrix, &source, &destination );
 
   if( destination.data == NULL )
   {
@@ -61,7 +68,13 @@ int main(int argc, char* argv[])
     return 0;
   }
 
-  stbi_image_free(data_src);
-  stbi_image_free(destination.data);;
+  stbi_write_bmp("test.bmp", 
+      destination.size[0],
+      destination.size[1],
+      destination.data_size,
+      destination.data);
+
+  stbi_image_free(source.data);
+  stbi_image_free(destination.data);
   return 0;
 }

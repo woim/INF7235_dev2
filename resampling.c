@@ -8,7 +8,6 @@ void transform_point(
 {
   int i,j;
   double coord_h[3];
-  double new_coord_h[3];
   
   for(i = 0 ; i < 2 ; ++i)
   {
@@ -61,16 +60,17 @@ void interpolate(
 
 
 void set_pixel(
-    Image* source,
+    Image* destination,
     int coord[2],
     unsigned char new_value[3])
 {
-  int i;
-  int index;
+  int i, index;
+
   for(i = 0; i < 3; ++i)
   {
-    index = coord[1]*source->size[0]*source->data_size + coord[0]*source->data_size + i;
-    source->data[index] = new_value[i];
+    index = coord[1]*destination->size[0]*destination->data_size + coord[0]*destination->data_size + i;
+    //printf("index: %d\n", index); 
+    destination->data[index] = new_value[i];
   } 
 }
 
@@ -80,11 +80,13 @@ void resampling(
   Image* source,
   Image* destination)
 {
-  int i,j;  
+  int i,j,index;  
   int vcoord[2];
   double wcoord[2];
   double new_coord[2];
   unsigned char new_value[3];
+
+  int end;
 
   for(i = 0; i < destination->size[0]-1; ++i)
   {
@@ -99,14 +101,23 @@ void resampling(
       transform_point( matrix, &wcoord[0], &new_coord[0]);
 
       if( new_coord[0] >= (double)source->origin[0] && 
-          new_coord[0] <= (double)source->size[0]   &&
+          new_coord[0] < (double)source->size[0]   &&
           new_coord[1] >= (double)source->origin[1] && 
-          new_coord[1] <= (double)source->size[1] ) 
+          new_coord[1] < (double)source->size[1] ) 
       {
         interpolate(source, new_coord, &new_value[0]);
       }
-      set_pixel(destination, vcoord, new_value);
+      //printf(" %d %d %d\n", new_value[0], new_value[1], new_value[2]);
+      //set_pixel(destination, vcoord, new_value);
+      index = vcoord[1]*destination->size[0]*destination->data_size + vcoord[0]*destination->data_size + i;
+      destination->data[index] = new_value[i];
     }
   }
+  end = destination->size[1]*destination->size[0]*destination->data_size-1;
+  new_value[2] = destination->data[end]; 
+  new_value[1] = destination->data[end-1]; 
+  new_value[0] = destination->data[end-2]; 
+  printf("last: %d %d %d\n", new_value[0], new_value[1], new_value[2]);
 }
+ 
 
