@@ -79,7 +79,7 @@ void resampling(
   Image* source,
   Image* destination)
 {
-  int i, j, k, index;  
+  int i, j;  
   int vcoord[2];
   double wcoord[2];
   double new_coord[2];
