@@ -68,9 +68,8 @@ void set_pixel(
 
   for(i = 0; i < 3; ++i)
   {
-    index = coord[1]*destination->size[0]*destination->data_size + coord[0]*destination->data_size + i;
-    //printf("index: %d\n", index); 
-    destination->data[index] = new_value[i];
+    index = coord[1]*destination->size[0]*destination->data_size + coord[0]*destination->data_size;
+    destination->data[index+i] = new_value[i];
   } 
 }
 
@@ -80,7 +79,7 @@ void resampling(
   Image* source,
   Image* destination)
 {
-  int i,j,index;  
+  int i, j, k, index;  
   int vcoord[2];
   double wcoord[2];
   double new_coord[2];
@@ -88,16 +87,16 @@ void resampling(
 
   int end;
 
-  for(i = 0; i < destination->size[0]-1; ++i)
+  for(i = 0; i < destination->size[0]; ++i)
   {
-    for(j = 0; j < destination->size[1]-1; ++j)
+    for(j = 0; j < destination->size[1]; ++j)
     {
       new_value[0] = new_value[1] = new_value[2] = 0;
 
       vcoord[0] = i;
       vcoord[1] = j;
-      wcoord[0] = (double) destination->origin[0] + (double) vcoord[0];
-      wcoord[1] = (double) destination->origin[1] + (double) vcoord[1];
+      wcoord[0] = (double)destination->origin[0] + (double)vcoord[0];
+      wcoord[1] = (double)destination->origin[1] + (double)vcoord[1];
       transform_point( matrix, &wcoord[0], &new_coord[0]);
 
       if( new_coord[0] >= (double)source->origin[0] && 
@@ -107,17 +106,9 @@ void resampling(
       {
         interpolate(source, new_coord, &new_value[0]);
       }
-      //printf(" %d %d %d\n", new_value[0], new_value[1], new_value[2]);
-      //set_pixel(destination, vcoord, new_value);
-      index = vcoord[1]*destination->size[0]*destination->data_size + vcoord[0]*destination->data_size + i;
-      destination->data[index] = new_value[i];
+      set_pixel(destination, vcoord, new_value);
     }
   }
-  end = destination->size[1]*destination->size[0]*destination->data_size-1;
-  new_value[2] = destination->data[end]; 
-  new_value[1] = destination->data[end-1]; 
-  new_value[0] = destination->data[end-2]; 
-  printf("last: %d %d %d\n", new_value[0], new_value[1], new_value[2]);
 }
  
 
