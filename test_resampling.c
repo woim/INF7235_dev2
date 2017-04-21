@@ -48,6 +48,53 @@ int test_interpolate()
            value_expected[2] == new_value[2]) ? 1 : 0;
 }
 
+int test_resampling()
+{
+  int i;
+  Image source;
+  source.size[0] = source.size[1] = 3;
+  source.origin[0] = source.origin[1] = 0;
+  source.data_size = 3;
+  source.data = (unsigned char*) malloc(27*sizeof(unsigned char));
+  for(i = 0; i < 27; ++i)
+  {
+    source.data[i] = 255;
+  }
+
+  Image destination;
+  destination.size[0] = destination.size[1] = 3;
+  destination.origin[0] = destination.origin[1] = 0;
+  destination.data_size = 3;
+  destination.data = (unsigned char*) malloc(27*sizeof(unsigned char));
+
+  Image expected;
+  expected.size[0] = expected.size[1] = 3;
+  expected.origin[0] = expected.origin[1] = 0;
+  expected.data_size = 3;
+  expected.data = (unsigned char*) malloc(27*sizeof(unsigned char));
+  for(i = 0; i < 27; ++i)
+  {
+    //expected.data[i] = 255;
+    if( i < 12 ) expected.data[i] = 255;
+    if( i > 12 ) expected.data[i] = 0;
+  }
+
+  double matrix[2][3] = { {0.0, 0.0, 2.0},
+                          {0.0, 0.0, 2.0} };
+
+  resampling(matrix, &source, &destination);
+  for(i = 0; i < 27; ++i)
+  {
+    printf("%d %d\n", expected.data[i], destination.data[i]);
+    if( expected.data[i] != destination.data[i] ) return 0;
+  }
+
+  free(source.data);
+  free(destination.data);
+  free(expected.data);
+  return 1;
+}
+
 void run_test(int test, char* test_name)
 {
   char* result;
@@ -64,5 +111,6 @@ int main(int argc, char* argv[])
   run_test(test_transform(), "Test transform");
   run_test(test_set_pixel(), "Test set_pixel");
   run_test(test_interpolate(), "Test interpolate");
+  run_test(test_resampling(), "Test resampling");
   return 0;
 }
