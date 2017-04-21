@@ -52,40 +52,43 @@ int test_resampling()
 {
   int i;
   Image source;
-  source.size[0] = source.size[1] = 3;
+  source.size[0] = source.size[1] = 2;
   source.origin[0] = source.origin[1] = 0;
   source.data_size = 3;
-  source.data = (unsigned char*) malloc(27*sizeof(unsigned char));
-  for(i = 0; i < 27; ++i)
+  source.data = (unsigned char*) malloc(12*sizeof(unsigned char));
+  for(i = 0; i < 12; ++i)
   {
     source.data[i] = 255;
   }
 
   Image destination;
-  destination.size[0] = destination.size[1] = 3;
+  destination.size[0] = destination.size[1] = 2;
   destination.origin[0] = destination.origin[1] = 0;
   destination.data_size = 3;
-  destination.data = (unsigned char*) malloc(27*sizeof(unsigned char));
-
-  Image expected;
-  expected.size[0] = expected.size[1] = 3;
-  expected.origin[0] = expected.origin[1] = 0;
-  expected.data_size = 3;
-  expected.data = (unsigned char*) malloc(27*sizeof(unsigned char));
-  for(i = 0; i < 27; ++i)
+  destination.data = (unsigned char*) malloc(12*sizeof(unsigned char));
+  for(i = 0; i < 12; ++i)
   {
-    //expected.data[i] = 255;
-    if( i < 12 ) expected.data[i] = 255;
-    if( i > 12 ) expected.data[i] = 0;
+    destination.data[i] = 0;
   }
 
-  double matrix[2][3] = { {0.0, 0.0, 2.0},
-                          {0.0, 0.0, 2.0} };
+  Image expected;
+  expected.size[0] = expected.size[1] = 2;
+  expected.origin[0] = expected.origin[1] = 0;
+  expected.data_size = 3;
+  expected.data = (unsigned char*) malloc(12*sizeof(unsigned char));
+  for(i = 0; i < 12; ++i)
+  {
+    //expected.data[i] = 255;
+    if( i < 3 ) expected.data[i] = 255;
+    if( i > 3 ) expected.data[i] = 0;
+  }
+
+  double matrix[2][3] = { {1.0, 0.0, 0.0},
+                          {0.0, 1.0, 0.0} };
 
   resampling(matrix, &source, &destination);
-  for(i = 0; i < 27; ++i)
+  for(i = 0; i < 12; ++i)
   {
-    printf("%d %d\n", expected.data[i], destination.data[i]);
     if( expected.data[i] != destination.data[i] ) return 0;
   }
 
