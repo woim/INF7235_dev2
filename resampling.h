@@ -1,4 +1,7 @@
 #include "stddef.h"
+#include "stdio.h"
+#include "stdlib.h"
+#include "memory.h" 
 
 typedef struct {
   int size[2];
@@ -23,11 +26,6 @@ void set_pixel(
     unsigned char new_value[3]);
 
 void resampling(
-  double matrix[2][3], 
+  double matrix[2][3],
   Image* source,
   Image* destination);
-
-void transform_point(
-    double matrix[2][3],
-    double* coord,
-    double* new_coord);
