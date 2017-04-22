@@ -1,9 +1,13 @@
 # Makefiel pour projet resampling
 COMPILER=/usr/bin/gcc
-OPTIONS= -I stb/ -lm -Wno-pointer-to-int-cast -Wno-int-to-pointer-cast
+MPI_COMPILER=mpicc
+OPTIONS= -std=c99 -I stb/ -Wno-pointer-to-int-cast -Wno-int-to-pointer-cast
 
-default: resampling_seq
+run_seq: resampling_seq
 	./resampling_sequential parrot.ppm
+
+run_par: resampling_par
+	mpirun -np 8 resampling_parallel
 
 test: test_res
 	./test_resampling
@@ -13,6 +17,12 @@ resampling: resampling.c
 
 resampling_seq: resampling resampling_sequential.c
 	$(COMPILER) $(OPTIONS) resampling_sequential.c -o resampling_sequential resampling.o
+
+resampling_mpi1: resampling resampling_mpi1.c
+	$(MPI_COMPILER) $(OPTIONS) -c resampling_mpi1.c -o resampling_mpi1.o resampling.o
+
+resampling_par: resmapling_mpi1 resampling
+	$(MPI_COMPILER) $(OPTIONS) -c resampling_parallel.c -o resampling_parallel resampling_mp1.o resampling.o
 
 test_res: test_resampling.c resampling
 	$(COMPILER) $(OPTIONS) test_resampling.c -o test_resampling resampling.o
