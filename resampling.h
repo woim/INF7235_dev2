@@ -7,6 +7,8 @@ typedef struct {
   int size[2];
   int origin[2];
   int data_size;
+  int length;
+  int offset;
   unsigned char* data;
 }Image;
 
