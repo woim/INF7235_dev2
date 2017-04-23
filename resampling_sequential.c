@@ -51,8 +51,11 @@ int main(int argc, char* argv[])
                                         destination.data_size*
                                         sizeof(unsigned char));
 
-  double matrix[2][3] = { {0.86, -0.5, 50.0},
-                          {0.5, 0.86, 50.0} };
+/*  double matrix[2][3] = { {0.86, -0.5, 50.0},
+                          {0.5, 0.86, 50.0} };*/
+  double matrix[2][3] = { {1.0, 0.0, 0.0},
+                          {0.0, 1.0, 0.0} };
+
 
   resampling( matrix, &source, &destination );
 

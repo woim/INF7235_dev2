@@ -65,7 +65,6 @@ void set_pixel(
     unsigned char new_value[3])
 {
   int i, index;
-
   for(i = 0; i < 3; ++i)
   {
     index = coord[1]*destination->size[0]*destination->data_size + coord[0]*destination->data_size;
