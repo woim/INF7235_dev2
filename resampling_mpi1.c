@@ -22,8 +22,8 @@ void resampling_mpi1(
   {
     remainder = source->size[1] % nb_procs;
     nb_rows = source->size[1] / nb_procs;
-    aptr_destination = malloc(sizeof(Image)*nb_procs);
     offset = 0;
+    aptr_destination = malloc(sizeof(Image)*nb_procs);
     aptr_resampled = malloc(sizeof(Image)*nb_procs);
 
     for(i = 0; i < nb_procs ; ++i)
@@ -61,9 +61,9 @@ void resampling_mpi1(
                 MPI_COMM_WORLD);
  
   resampling( matrix, source, ptr_image );
-  printf("Proceseeur: %d value ptr: %d\n", id_proc, ptr_image->data);
-  printf("Size:   %d %d %d\n", ptr_image->size[0], ptr_image->size[1], ptr_image->data_size);
-  printf("Origin: %d %d \n", ptr_image->origin[0], ptr_image->origin[1]);
+//  printf("Proceseeur: %d value ptr: %d\n", id_proc, ptr_image->data);
+//  printf("Size:   %d %d %d\n", ptr_image->size[0], ptr_image->size[1], ptr_image->data_size);
+//  printf("Origin: %d %d \n", ptr_image->origin[0], ptr_image->origin[1]);
  
   MPI_Gather( ptr_image, 
               sizeof(Image), 
@@ -76,12 +76,24 @@ void resampling_mpi1(
 
   if( id_proc == 0 )
   {
-    for(i = 0; i < nb_procs ; ++i)
+/*
+    destination->size[0] = source->size[0];
+    destination->size[1] = source->size[1];
+    destination->origin[0] = source->origin[0];
+    destination->origin[1] = source->origin[1];
+    destination->data_size = source->data_size;
+    destination->data = (unsigned char*) malloc(
+                                        destination->size[0]*
+                                        destination->size[1]*
+                                        destination->data_size*
+                                        sizeof(unsigned char));
+*/   
+    for(i = 0; i < nb_procs; ++i)
     {
-      printf("Proceseeur: %d value ptr: %d\n", id_proc, aptr_resampled[i].data);
-      printf("Size resampled:   %d %d %d\n", aptr_resampled[i].size[0], aptr_resampled[i].size[1], aptr_resampled[i].data_size);
-      printf("Origin resampled: %d %d \n", aptr_resampled[i].origin[0], aptr_resampled[i].origin[1]);
-      printf("Offset length: %d %d \n", aptr_resampled[i].offset, aptr_resampled[i].length);
+//      printf("Proceseeur: %d value ptr: %d\n", id_proc, aptr_resampled[i].data);
+//      printf("Size resampled:   %d %d %d\n", aptr_resampled[i].size[0], aptr_resampled[i].size[1], aptr_resampled[i].data_size);
+//      printf("Origin resampled: %d %d \n", aptr_resampled[i].origin[0], aptr_resampled[i].origin[1]);
+//      printf("Offset length: %d %d \n", aptr_resampled[i].offset, aptr_resampled[i].length);
       memcpy( destination->data + aptr_resampled[i].offset,
               aptr_resampled[i].data, 
               aptr_resampled[i].length);

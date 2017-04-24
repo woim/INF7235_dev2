@@ -4,12 +4,11 @@ MPI_COMPILER=mpicc -std=c99
 OPTIONS= -I stb/ -Wno-pointer-to-int-cast -Wno-int-to-pointer-cast
 IMAGE=parrot.ppm
 
-
 run_seq: resampling_seq
 	./resampling_sequential $(IMAGE)
 
 run_par: resampling_par
-	mpirun -np 1 resampling_parallel $(IMAGE)
+	mpirun -np ${N} resampling_parallel $(IMAGE)
 	
 test: test_res
 	./test_resampling
@@ -26,7 +25,7 @@ resampling_mpi1: resampling_mpi1.c resampling
 resampling_par: resampling_mpi1 	 
 	$(MPI_COMPILER) ${OPTIONS} resampling_parallel.c -o resampling_parallel resampling_mpi1.o resampling.o
 
-test_res: test_resampling.c resampling
+test_res: resampling test_resampling.c
 	$(COMPILER) $(OPTIONS) test_resampling.c -o test_resampling resampling.o
 
 bm:
