@@ -1,5 +1,6 @@
 #include "stdio.h"
 #include "stddef.h"
+#include "time.h"
 #include "resampling.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -59,11 +60,10 @@ int main(int argc, char* argv[])
 
   double matrix[2][3] = { {0.86, -0.5, 50.0},
                           {0.5, 0.86, 50.0} };
-                        
-/*  double matrix[2][3] = { {1.0, 0.0, 0.0},
-                          {0.0, 1.0, 0.0} };
-*/
+  
+  clock_t start = clock();  
   resampling( matrix, &source, &destination );
+  clock_t stop = clock();  
 
   if( destination.data == NULL )
   {
@@ -79,5 +79,8 @@ int main(int argc, char* argv[])
 
   stbi_image_free(source.data);
   stbi_image_free(destination.data);
+  
+  double time = ((double)(stop-start))/CLOCKS_PER_SEC;
+  printf("%f\n",time);
   return 0;
 }

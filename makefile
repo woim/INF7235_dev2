@@ -16,6 +16,9 @@ test: test_res
 resampling: resampling.c
 	$(COMPILER) $(OPTIONS) -c resampling.c -o resampling.o
 
+#test_loop: test_loop.c
+#	$(COMPILER) $(OPTIONS) -c test_loop.c -o test_loop.o
+
 resampling_seq: resampling resampling_sequential.c
 	$(COMPILER) $(OPTIONS) -lm resampling_sequential.c -o resampling_sequential resampling.o
 
@@ -29,7 +32,15 @@ test_res: resampling test_resampling.c
 	$(COMPILER) $(OPTIONS) test_resampling.c -o test_resampling resampling.o
 
 bm:
-
+	mpirun -np 1   resampling_parallel $(IMAGE)
+	mpirun -np 2   resampling_parallel $(IMAGE)
+	mpirun -np 4   resampling_parallel $(IMAGE)
+	mpirun -np 8   resampling_parallel $(IMAGE)
+	mpirun -np 16  resampling_parallel $(IMAGE)
+	mpirun -np 32  resampling_parallel $(IMAGE)
+	mpirun -np 64  resampling_parallel $(IMAGE)
+	mpirun -np 128 resampling_parallel $(IMAGE)
+	
 clean:
 	\rm -f *~
 	\rm -f *.o

@@ -8,100 +8,87 @@ void resampling_mpi1(
 {
   int id_proc;
   int nb_procs;
-  int i, remainder, nb_rows, offset;
-  Image* ptr_image;
-  Image* aptr_resampled;
+  int i, remainder, nb_rows, offset, origin_offset;
+  int *lengths;
+  int *offsets;
+  unsigned char* ptr_data;
+  unsigned char* ptr_resampled;
   Image* aptr_destination;
 
   MPI_Comm_rank ( MPI_COMM_WORLD , &id_proc );
   MPI_Comm_size ( MPI_COMM_WORLD , &nb_procs );
-
-  ptr_image = malloc(sizeof(Image));
-
-  if( id_proc == 0 )
+  
+  lengths = malloc(sizeof(int)*nb_procs);
+  offsets = malloc(sizeof(int)*nb_procs);
+  aptr_destination = malloc(sizeof(Image)*nb_procs);
+  ptr_resampled = malloc(sizeof(unsigned char)*source->length);
+  
+  remainder = source->size[1] % nb_procs;
+  nb_rows = source->size[1] / nb_procs;
+  offset = 0;
+  origin_offset = 0;
+ 
+  for(i = 0; i < nb_procs ; ++i)
   {
-    remainder = source->size[1] % nb_procs;
-    nb_rows = source->size[1] / nb_procs;
-    offset = 0;
-    aptr_destination = malloc(sizeof(Image)*nb_procs);
-    aptr_resampled = malloc(sizeof(Image)*nb_procs);
-
-    for(i = 0; i < nb_procs ; ++i)
+    aptr_destination[i].size[0] = source->size[0];
+    aptr_destination[i].size[1] = nb_rows;
+    if( remainder > 0 )
     {
-      aptr_destination[i].size[0] = source->size[0];
-      aptr_destination[i].size[1] = nb_rows;
-      if( remainder > 0 )
-      {
-        aptr_destination[i].size[1]++;
-        remainder--;
-      } 
-      aptr_destination[i].data_size = source->data_size;
-      aptr_destination[i].origin[0] = source->origin[0];
-      aptr_destination[i].origin[1] = source->origin[1]+
-                                        i*aptr_destination[i].size[1];
-      aptr_destination[i].length = aptr_destination[i].size[0]*
-                                   aptr_destination[i].size[1]*
-                                   aptr_destination[i].data_size;
-      aptr_destination[i].offset = offset;
-      aptr_destination[i].data = malloc(sizeof(unsigned char)*aptr_destination[i].length);
-      memcpy( aptr_destination[i].data,
-              source->data + aptr_destination[i].offset, 
-              aptr_destination[i].length);
-      offset += aptr_destination[i].length;
-    }
+      aptr_destination[i].size[1]++;
+      remainder--;
+    } 
+    aptr_destination[i].data_size = source->data_size;
+    aptr_destination[i].origin[0] = source->origin[0];
+    aptr_destination[i].origin[1] = origin_offset;  
+    aptr_destination[i].length = aptr_destination[i].size[0]*
+                                    aptr_destination[i].size[1]*
+                                    aptr_destination[i].data_size;
+    aptr_destination[i].offset = offset;
+    offset += aptr_destination[i].length;
+    origin_offset += aptr_destination[i].size[1];
+    lengths[i] = aptr_destination[i].length;
+    offsets[i] = aptr_destination[i].offset;
   }
   
-  MPI_Scatter(  aptr_destination, 
-                sizeof(Image), 
+  ptr_data = malloc(sizeof(unsigned char)*lengths[id_proc]);
+  
+  MPI_Scatterv( source->data, 
+                lengths,
+                offsets,
                 MPI_BYTE, 
-                ptr_image, 
-                sizeof(Image), 
+                ptr_data,
+                lengths[id_proc], 
                 MPI_BYTE, 
                 0, 
                 MPI_COMM_WORLD);
- 
-  resampling( matrix, source, ptr_image );
-//  printf("Proceseeur: %d value ptr: %d\n", id_proc, ptr_image->data);
-//  printf("Size:   %d %d %d\n", ptr_image->size[0], ptr_image->size[1], ptr_image->data_size);
-//  printf("Origin: %d %d \n", ptr_image->origin[0], ptr_image->origin[1]);
- 
-  MPI_Gather( ptr_image, 
-              sizeof(Image), 
-              MPI_BYTE,
-              aptr_resampled,
-              sizeof(Image),
-              MPI_BYTE,
-              0,
-              MPI_COMM_WORLD);
+
+  Image local_image;
+  local_image.size[0] = aptr_destination[id_proc].size[0];
+  local_image.size[1] = aptr_destination[id_proc].size[1];
+  local_image.data_size = aptr_destination[id_proc].data_size;
+  local_image.origin[0] = aptr_destination[id_proc].origin[0];
+  local_image.origin[1] = aptr_destination[id_proc].origin[1];
+  local_image.length = aptr_destination[id_proc].length;
+  local_image.offset = aptr_destination[id_proc].offset;
+  local_image.data = ptr_data;
+
+  resampling( matrix, source, &local_image);
+    
+  MPI_Gatherv(  local_image.data, 
+                lengths[id_proc],
+                MPI_BYTE,
+                ptr_resampled,
+                lengths,
+                offsets,
+                MPI_BYTE,
+                0,
+                MPI_COMM_WORLD);
 
   if( id_proc == 0 )
   {
-/*
-    destination->size[0] = source->size[0];
-    destination->size[1] = source->size[1];
-    destination->origin[0] = source->origin[0];
-    destination->origin[1] = source->origin[1];
-    destination->data_size = source->data_size;
-    destination->data = (unsigned char*) malloc(
-                                        destination->size[0]*
-                                        destination->size[1]*
-                                        destination->data_size*
-                                        sizeof(unsigned char));
-*/   
-    for(i = 0; i < nb_procs; ++i)
-    {
-//      printf("Proceseeur: %d value ptr: %d\n", id_proc, aptr_resampled[i].data);
-//      printf("Size resampled:   %d %d %d\n", aptr_resampled[i].size[0], aptr_resampled[i].size[1], aptr_resampled[i].data_size);
-//      printf("Origin resampled: %d %d \n", aptr_resampled[i].origin[0], aptr_resampled[i].origin[1]);
-//      printf("Offset length: %d %d \n", aptr_resampled[i].offset, aptr_resampled[i].length);
-      memcpy( destination->data + aptr_resampled[i].offset,
-              aptr_resampled[i].data, 
-              aptr_resampled[i].length);
-      free(aptr_resampled[i].data);
-    }
- 
-    free(aptr_destination);
-    free(aptr_resampled);
+    destination->data = ptr_resampled;
   }
-  free(ptr_image);
+  free(ptr_data);
+  free(aptr_destination);
 }
+
