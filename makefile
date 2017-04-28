@@ -10,14 +10,10 @@ run_seq: resampling_seq
 run_par: resampling_par
 	mpirun -np ${N} resampling_parallel $(IMAGE)
 	
-test: test_res
-	./test_resampling
+test: test_comp test_mpi1
 
 resampling: resampling.c
 	$(COMPILER) $(OPTIONS) -c resampling.c -o resampling.o
-
-#test_loop: test_loop.c
-#	$(COMPILER) $(OPTIONS) -c test_loop.c -o test_loop.o
 
 resampling_seq: resampling resampling_sequential.c
 	$(COMPILER) $(OPTIONS) -lm resampling_sequential.c -o resampling_sequential resampling.o
@@ -28,8 +24,14 @@ resampling_mpi1: resampling_mpi1.c resampling
 resampling_par: resampling_mpi1 	 
 	$(MPI_COMPILER) ${OPTIONS} resampling_parallel.c -o resampling_parallel resampling_mpi1.o resampling.o
 
+test_comp: test_res
+	./test_resampling
+
 test_res: resampling test_resampling.c
 	$(COMPILER) $(OPTIONS) test_resampling.c -o test_resampling resampling.o
+
+test_mpi1: resampling_seq resampling_par
+	./test_mpi1.sh
 
 bm:
 	mpirun -np 1   resampling_parallel $(IMAGE)
@@ -44,4 +46,4 @@ bm:
 clean:
 	\rm -f *~
 	\rm -f *.o
-	\rm -f resampling_sequential test_resampling
+	\rm -f resampling_sequential test_resampling resampling_parallel
