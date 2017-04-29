@@ -27,11 +27,11 @@ int main(int argc, char* argv[])
     printf("Error: %s\n", stbi_failure_reason());
     return 0;
   }
-
+/*
   printf("Width: %d\n", x);
   printf("Height: %d\n", y);
   printf("Data length: %d\n", n);
-
+*/
   Image source;
   source.size[0] = x;
   source.size[1] = y;

@@ -33,16 +33,9 @@ test_res: resampling test_resampling.c
 test_mpi1: resampling_seq resampling_par
 	./test_mpi1.sh
 
-bm:
-	mpirun -np 1   resampling_parallel $(IMAGE)
-	mpirun -np 2   resampling_parallel $(IMAGE)
-	mpirun -np 4   resampling_parallel $(IMAGE)
-	mpirun -np 8   resampling_parallel $(IMAGE)
-	mpirun -np 16  resampling_parallel $(IMAGE)
-	mpirun -np 32  resampling_parallel $(IMAGE)
-	mpirun -np 64  resampling_parallel $(IMAGE)
-	mpirun -np 128 resampling_parallel $(IMAGE)
-	
+bm1: resampling_seq resampling_par
+	./performance_mpi1.pl
+
 clean:
 	\rm -f *~
 	\rm -f *.o
