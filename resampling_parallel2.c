@@ -61,7 +61,6 @@ int main(int argc, char* argv[])
   double matrix[2][3] = { {0.86, -0.5, 50.0},
                           {0.5, 0.86, 50.0} }; 
 
-  MPI_Barrier(MPI_COMM_WORLD);
   start = MPI_Wtime();
   resampling_mpi2( matrix, &source, &destination );
   finish = MPI_Wtime();
@@ -74,7 +73,7 @@ int main(int argc, char* argv[])
       return 0;
     }
 
-    stbi_write_bmp("test_mpi1.bmp",
+    stbi_write_bmp("test_mpi2.bmp",
         destination.size[0],
         destination.size[1],
         destination.data_size,
